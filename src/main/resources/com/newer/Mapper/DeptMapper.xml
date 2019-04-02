@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.newer.Mapper.DeptMapper">
+
+  <resultMap id="dept1" type="com.newer.domain.Dept">
+      <id property="deptno" column="deptno"/>
+      <result property="dname" column="dname"/>
+      <result property="loc" column="loc"/>
+      <association property="emp" javaType="com.newer.domain.Emp">
+          <id property="empNo" column="empno"/>
+          <result property="ename" column="ename"/>
+          <result property="sal" column="sal"/>
+          <result property="hiredate" column="hiredate"/>
+      </association>
+  </resultMap>
+
+
+</mapper>  

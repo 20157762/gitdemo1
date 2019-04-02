@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--spring bean容器配置文件-->
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/util
+	http://www.springframework.org/schema/util/spring-util-4.1.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<!--组件扫描基础包名-->
+	<context:component-scan base-package="com.*.Mapper,com.*.service"/>
+	<!--开启注解配置-->
+	<context:annotation-config/>
+
+	<!--定义属性文件读取器-->
+	<util:properties id="reader" location="classpath:mysql.properties"/>
+
+	<!--定义数据源-->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="#{reader[driver]}"/>
+		<property name="jdbcUrl" value="#{reader[url]}"/>
+		<property name="user" value="#{reader[user]}"/>
+		<property name="password" value="#{reader[password]}"/>
+		<property name="initialPoolSize" value="5"/>
+		<property name="maxPoolSize" value="10"/>
+		<property name="minPoolSize" value="5"/>
+		<property name="maxIdleTime" value="120"/>
+	</bean>
+
+	<!--配置mybatis映射接口的基础包名-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.newer.Mapper"/>
+	</bean>
+
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+		<!--数据源-->
+		<property name="dataSource" ref="dataSource"/>
+		<!--别名配置-->
+		<property name="typeAliasesPackage" value="com.newer.domain"/>
+
+	</bean>
+
+	<!--事务管理器-->
+	<bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!--声明式事务-->
+	<tx:advice transaction-manager="transactionManager" id="advice1">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT"/>
+			<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT"/>
+			<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT"/>
+			<tx:method name="*" propagation="NOT_SUPPORTED" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+
+	<!--事务切面-->
+	<aop:config>
+		<aop:pointcut id="pointcut1" expression="execution(* com.*.service.*.*(..))"/>
+		<aop:advisor advice-ref="advice1" pointcut-ref="pointcut1"/>
+	</aop:config>
+
+	<!--配置注解驱动事务-->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+
+</beans>
